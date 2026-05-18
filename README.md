@@ -66,3 +66,29 @@ Then visit <http://localhost:8000/outofroad.html>.
 ## License
 
 No explicit license file is currently present. Add a `LICENSE` if you want clear reuse terms.
+
+## Vercel deployment readiness
+
+This project is now set up to deploy as a static site on Vercel:
+
+- Added `index.html` as the default entry point Vercel serves at `/`.
+- Added `vercel.json` with:
+  - clean URL behavior
+  - basic security headers
+  - no-cache behavior for HTML
+- Normalized smart punctuation in HTML/CSS/JS to standard ASCII quotes/dashes to avoid browser parse issues.
+
+### Deploy steps
+
+1. Push this repository to GitHub/GitLab/Bitbucket.
+2. In Vercel, click **Add New Project** and import the repo.
+3. Framework preset: **Other** (or leave auto-detected static).
+4. Build command: _none_.
+5. Output directory: _root_ (leave empty).
+6. Deploy.
+
+### Optional follow-ups
+
+- Move inline CSS/JS out of `index.html` into `styles.css` / `game.js` for maintainability.
+- Add a lightweight CI check (HTML validation + link check) before deployment.
+- Consider self-hosting fonts to avoid third-party font request dependency.
