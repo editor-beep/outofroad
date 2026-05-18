@@ -346,16 +346,12 @@ const state = {
     talkedToShelly: false,
     talkedToWayne: false,
     talkedToMary: false,
-    talkedToMara: false,
-    talkedToGlen: false,
     dumpsterDived: false,
     couchSearched_shelter: false,
     couchSearched_wayne: false,
     couchSearched_laundro: false,
     dishesWashed: false,
     flyersHung: false,
-    usheredAtVillage: false,
-    sortedFlyersAtCostco: false,
     helpedDog: false,
     trunkChecked: false,
     gloveboxChecked: false,
@@ -806,7 +802,14 @@ const locations = {
 };
 
 // ─── MAP ORDER ────────────────────────────────────────────────────────────────
-const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','village_theatre','pickering_place','alley','bottle_depot','gas_station'];
+const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','bottle_depot','gas_station'];
+
+// Keep location registration additive to reduce merge conflicts when mapOrder changes elsewhere.
+['village_theatre', 'pickering_place'].forEach((locKey) => {
+  if (!mapOrder.includes(locKey) && locations[locKey]) {
+    mapOrder.splice(mapOrder.indexOf('alley'), 0, locKey);
+  }
+});
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function moneyStr(cents) {
