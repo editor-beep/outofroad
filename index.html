@@ -230,72 +230,6 @@ flex-wrap: wrap;
 margin-bottom: 16px;
 }
 
-.travel-map-wrap {
-  background: #0f0b05;
-  border: 1px solid #2a1e08;
-  border-radius: 2px;
-  padding: 8px;
-  margin-bottom: 16px;
-}
-
-.travel-map {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.travel-road {
-  stroke: #3a2a10;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
-
-.travel-road.locked {
-  stroke: #22180a;
-  stroke-dasharray: 4 4;
-}
-
-.travel-pin {
-  cursor: pointer;
-}
-
-.travel-pin-dot {
-  fill: #4a3820;
-  stroke: #8a7a5a;
-  stroke-width: 2;
-  transition: all 0.15s;
-}
-
-.travel-pin-label {
-  fill: var(--grey);
-  font-family: 'VT323', monospace;
-  font-size: 15px;
-  letter-spacing: 0.6px;
-  pointer-events: none;
-}
-
-.travel-pin:hover .travel-pin-dot {
-  fill: #6a4a24;
-  stroke: var(--gold);
-}
-
-.travel-pin:hover .travel-pin-label {
-  fill: var(--pale);
-}
-
-.travel-pin.current .travel-pin-dot {
-  fill: #c44a1a;
-  stroke: var(--gold);
-}
-
-.travel-pin.current .travel-pin-label {
-  fill: var(--gold);
-}
-
-.travel-pin.visited .travel-pin-dot {
-  fill: #5a4828;
-}
-
 .map-loc {
 font-family: 'VT323', monospace;
 font-size: 0.95rem;
@@ -392,7 +326,7 @@ transition: background 0.3s;
 
   <header>
     <div class="title">FLOAT ON (EVENTUALLY)</div>
-    <div class="subtitle">a modest mouse adventure · issaquah, wa · 1997</div>
+    <div class="subtitle">a modest mouse adventure · issaquah, wa · 1997 · formed here in 1993</div>
   </header>
 
   <div id="gameContainer"></div>
@@ -421,6 +355,12 @@ const state = {
     helpedDog: false,
     trunkChecked: false,
     gloveboxChecked: false,
+    talkedToLena: false,
+    hatcheryVolunteer: false,
+    hatcheryCrateMoved: false,
+    talkedToDev: false,
+    buskerSetPlayed: false,
+    routeTipShared: false,
   },
   log: [],
   turn: 0,
@@ -705,6 +645,80 @@ const locations = {
     ]
   },
 
+  village_theatre: {
+    name: "Village Theatre (First Stage Block)",
+    short: "Village Theatre",
+    svg: drawTheatre,
+    description: () => `Front Street's lit up by the old First Stage building and the newer Gaudette Theatre across the way. In 1997, everybody still calls it \"the Village\" like it's one room, even though the big Gaudette house opened in '94 and changed the whole block.`,
+    actions: [
+      {
+        label: '🎭 Talk to Mara at the box office',
+        key: 'talk_mara',
+        available: () => !state.flags.talkedToMara,
+        do: () => {
+          state.flags.talkedToMara = true;
+          narrative("Mara counts ticket stubs with one hand and answers your disaster with the other.\n\n\"Your Civic died?\"\n\n\"Yeah.\"\n\n\"Usher call-out tonight. Forty-five minutes. Cash envelope after curtain.\"\n\nYou nod like this is a normal career move.");
+          log("Mara offered an usher shift.");
+        }
+      },
+      {
+        label: '🎟️ Usher late seating for Act One',
+        key: 'usher_shift',
+        available: () => state.flags.talkedToMara && !state.flags.usheredAtVillage,
+        do: () => {
+          state.flags.usheredAtVillage = true;
+          gainMoney(110, 'usher shift at Village Theatre');
+          narrative("You hand out programs, whisper \"watch your step\" fourteen times, and seat three families after lights down without dropping a flashlight. Mara slips you a folded envelope on break.\n\n\"Hundred and ten,\" she says. \"And take these cans from concessions before they go flat.\"");
+          gainBottles(5);
+          log("Ushered at Village Theatre: +$1.10 and 5 bottles.");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
+  pickering_place: {
+    name: "Pickering Place Offices",
+    short: "Pickering Place",
+    svg: drawOfficePark,
+    description: () => `At Pickering Place, the Costco office buildings still smell new. They moved their HQ here from Kirkland last year (1996), and now half the parking lot is membership cards and coffee thermoses.`,
+    actions: [
+      {
+        label: '💬 Ask Glen by the loading door',
+        key: 'talk_glen',
+        available: () => !state.flags.talkedToGlen,
+        do: () => {
+          state.flags.talkedToGlen = true;
+          narrative("Glen is on smoke break in a blue vest with his badge flipped backward.\n\n\"No hiring today,\" he says before you finish asking. \"But marketing dumped a box of old flyer inserts in receiving. Sort the recycling and I'll cover your bus fare equivalent.\"");
+          log("Glen offered a quick sorting job.");
+        }
+      },
+      {
+        label: '📦 Sort flyer inserts for recycling',
+        key: 'sort_flyers',
+        available: () => state.flags.talkedToGlen && !state.flags.sortedFlyersAtCostco,
+        do: () => {
+          state.flags.sortedFlyersAtCostco = true;
+          gainMoney(95, 'sorting paper at Pickering Place');
+          gainBottles(3);
+          narrative("You separate glossy inserts, cardboard cores, and a depressing amount of shrink wrap. Glen hands you ninety-five cents in mixed coin and points at a sack of empties from the breakroom.\n\n\"Take those too,\" he says. \"State says five cents each anyway.\"");
+          log("Sorted office recycling: +95¢ and 3 bottles.");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
   alley: {
     name: "The Alley Behind 4th",
     short: "Alley",
@@ -769,6 +783,92 @@ const locations = {
     ]
   },
 
+  salmon_hatchery: {
+    name: "Issaquah Salmon Hatchery",
+    short: "Hatchery",
+    svg: drawDepot,
+    description: () => `Concrete raceways, creek water, and that metallic-sweet fish smell that sits in the back of your throat. You're by the Issaquah Salmon Hatchery off Sunset Way, where everybody from town ends up eventually - school kids, retirees, people killing ten minutes before traffic clears on Front Street.`,
+    actions: [
+      {
+        label: '💬 Talk to Lena (volunteer docent)',
+        key: 'talk_lena',
+        available: () => !state.flags.talkedToLena,
+        do: () => {
+          state.flags.talkedToLena = true;
+          narrative("Lena's in a faded hatchery vest, answering the same salmon questions for the fourth time this hour.\n\n"Car trouble?" she says before you finish your sentence. "Yeah, I can spot the face. I don't have cash, but I've got bottles from the staff fridge."\n\nShe hands you a paper bag with five empties and points at a hand truck loaded with educational exhibit crates. "If you can move those across to the classroom, I'll make it worth your time."");
+          gainBottles(5);
+          log("Lena at hatchery: 5 bottles + offered crate job.");
+        }
+      },
+      {
+        label: '📦 Move exhibit crates for Lena',
+        key: 'move_crates',
+        available: () => state.flags.talkedToLena && !state.flags.hatcheryCrateMoved,
+        do: () => {
+          state.flags.hatcheryCrateMoved = true;
+          state.flags.hatcheryVolunteer = true;
+          gainMoney(120, 'hatchery volunteer stipend');
+          narrative("You push two wobbly carts of laminated salmon-life-cycle boards and a tote of kid-sized life jackets into the classroom wing. A field trip bunch is ten minutes out, and Lena is visibly less stressed when you're done.\n\n"City gives us tiny stipends for setup help," she says, counting out a dollar and two dimes. "Take it before I spend it on coffee."");
+          log("Helped Lena move crates: +$1.20");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
+  transit_center: {
+    name: "Issaquah Transit Center",
+    short: "Transit Ctr",
+    svg: drawGasStation,
+    description: () => `The Issaquah Transit Center is all concrete bays, brake hiss, and commuters checking the time like they can bully it. A 554 to Seattle is posted on the board, and everybody crowds Bay 2 whenever headlights swing in from Newport Way.`,
+    actions: [
+      {
+        label: '💬 Talk to Dev (route supervisor)',
+        key: 'talk_dev',
+        available: () => !state.flags.talkedToDev,
+        do: () => {
+          state.flags.talkedToDev = true;
+          narrative("Dev has a radio clipped to his jacket and the thousand-yard stare of somebody who got asked where the 271 stops fifty times today.\n\n"No cash jobs," he says, "but if you can play something mellow for ten minutes, it keeps the platform from getting weird. Don't block the ADA strip and don't get in front of Bay 2."");
+          log("Dev allowed a short busker set.");
+        }
+      },
+      {
+        label: '🎶 Play a legal busker set',
+        key: 'busker_set',
+        available: () => state.flags.talkedToDev && !state.flags.buskerSetPlayed,
+        do: () => {
+          state.flags.buskerSetPlayed = true;
+          gainMoney(95, 'busker tips at transit center');
+          narrative("You keep it to one corner, out of the flow. Two office workers drop quarters, one barista drops a dollar, and a guy in hiking boots nods through the whole song without smiling.\n\nWhen a 554 pulls in, Dev points with two fingers: wrap it up. You do. He gives you a small thumbs-up on your way out.");
+          log("Transit busker set: +95¢");
+        }
+      },
+      {
+        label: '🧭 Give directions to a lost rider',
+        key: 'route_help',
+        available: () => state.flags.talkedToDev && !state.flags.routeTipShared,
+        do: () => {
+          state.flags.routeTipShared = true;
+          gainMoney(40, 'thank-you coffee money');
+          narrative("A nursing student asks if the Seattle express boards here or at the Highlands park-and-ride. You point to Bay 2 and read the sign with her to be sure.\n\nShe relaxes immediately, then presses two quarters and three dimes into your hand. "Coffee money for saving me from missing clinical," she says.");
+          log("Helped rider with Bay 2 info: +40¢");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
+
   driveway_end: {
     name: "Isaac's Driveway (Gas In Hand)",
     short: "Driveway",
@@ -794,13 +894,29 @@ const locations = {
 };
 
 // ─── MAP ORDER ────────────────────────────────────────────────────────────────
-const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','bottle_depot','gas_station'];
+const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','salmon_hatchery','transit_center','bottle_depot','gas_station'];
+
+// Keep location registration additive to reduce merge conflicts when mapOrder changes elsewhere.
+['village_theatre', 'pickering_place'].forEach((locKey) => {
+  if (!mapOrder.includes(locKey) && locations[locKey]) {
+    mapOrder.splice(mapOrder.indexOf('alley'), 0, locKey);
+  }
+});
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function moneyStr(cents) {
   if (cents < 100) return `${cents}¢`;
   const d = Math.floor(cents/100), c = cents%100;
   return c > 0 ? `$${d}.${String(c).padStart(2,'0')}` : `$${d}.00`;
+}
+
+
+function modestMood() {
+  const pct = state.money / state.gasNeeded;
+  if (pct >= 1) return 'Float On';
+  if (pct >= 0.66) return 'Ocean Breathes Salty';
+  if (pct >= 0.33) return 'The World at Large';
+  return 'Dramamine';
 }
 
 function gainMoney(cents, source) {
@@ -842,45 +958,6 @@ function goTo(loc) {
 
 function showMap() {
   narrative("Where do you need to go?\n\n(Use the map below.)");
-}
-
-function renderTravelMap() {
-  const points = {
-    driveway: { x: 75, y: 175, label: "Driveway" },
-    earnests: { x: 160, y: 125, label: "Ernest's" },
-    shellys: { x: 250, y: 85, label: "Shelly's" },
-    waynes: { x: 375, y: 62, label: "Wayne's" },
-    laundromat: { x: 505, y: 88, label: "Laundromat" },
-    alley: { x: 610, y: 130, label: "Alley" },
-    bottle_depot: { x: 470, y: 172, label: "Bottle Depot" },
-    gas_station: { x: 300, y: 175, label: "Gas Station" }
-  };
-  const routes = [
-    ['driveway', 'earnests'], ['earnests', 'shellys'], ['shellys', 'waynes'],
-    ['waynes', 'laundromat'], ['laundromat', 'alley'], ['alley', 'bottle_depot'],
-    ['bottle_depot', 'gas_station'], ['gas_station', 'driveway'], ['shellys', 'gas_station']
-  ];
-
-  return `
-  <svg class="travel-map" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Town map with clickable travel locations">
-    <rect width="700" height="230" fill="#171008"/>
-    <path d="M0,35 C140,10 290,25 420,15 C520,8 600,20 700,28" stroke="#241809" stroke-width="22" fill="none" opacity="0.35"/>
-    ${routes.map(([a,b]) => {
-      const pa = points[a], pb = points[b];
-      const known = state.visitedLocations.has(a) || state.visitedLocations.has(b);
-      return `<line class="travel-road ${known ? '' : 'locked'}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" />`;
-    }).join('')}
-    ${mapOrder.filter(l => l !== 'driveway_end').map((locKey) => {
-      const p = points[locKey];
-      const isCurrent = state.location === locKey;
-      const isVisited = state.visitedLocations.has(locKey);
-      return `
-      <g class="travel-pin ${isCurrent ? 'current' : ''} ${isVisited ? 'visited' : ''}" onclick="goTo('${locKey}')">
-        <circle class="travel-pin-dot" cx="${p.x}" cy="${p.y}" r="12"/>
-        <text class="travel-pin-label" x="${p.x + 16}" y="${p.y + 5}">${p.label}</text>
-      </g>`;
-    }).join('')}
-  </svg>`;
 }
 
 // ─── SVG SCENES ───────────────────────────────────────────────────────────────
@@ -1093,6 +1170,42 @@ function drawLaundromat() {
   </svg>`;
 }
 
+function drawTheatre() {
+  return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="780" height="200" fill="#1a1208"/>
+    <rect width="780" height="125" fill="#111019"/>
+    <rect y="125" width="780" height="75" fill="#1a1208"/>
+    <rect x="70" y="42" width="250" height="95" fill="#18140f" stroke="#2b2217" stroke-width="1"/>
+    <rect x="80" y="52" width="95" height="70" fill="#0e0d0a"/>
+    <text x="127" y="87" text-anchor="middle" fill="#d4a832" font-family="VT323" font-size="11">FIRST STAGE</text>
+    <rect x="360" y="30" width="320" height="118" fill="#1a1a1a" stroke="#2b2b2b" stroke-width="1"/>
+    <rect x="380" y="48" width="280" height="20" fill="#c44a1a" opacity="0.55"/>
+    <text x="520" y="62" text-anchor="middle" fill="#f0e8d0" font-family="Courier Prime" font-size="11">GAUDETTE THEATRE</text>
+    <rect x="430" y="72" width="180" height="56" fill="#0f1216" stroke="#2a3340" stroke-width="1"/>
+    <circle cx="220" cy="152" r="9" fill="#241b13"/>
+    <rect x="213" y="160" width="14" height="18" fill="#2b2018"/>
+    <text x="390" y="190" text-anchor="middle" fill="#3a2a10" font-family="Courier Prime" font-size="11">FRONT STREET · VILLAGE THEATRE BLOCK</text>
+  </svg>`;
+}
+
+function drawOfficePark() {
+  return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="780" height="200" fill="#1a1208"/>
+    <rect width="780" height="120" fill="#10131a"/>
+    <rect y="120" width="780" height="80" fill="#1a1208"/>
+    <rect x="80" y="38" width="210" height="88" fill="#1a1e24" stroke="#2a323a" stroke-width="1"/>
+    <rect x="310" y="34" width="180" height="92" fill="#1d232a" stroke="#2a323a" stroke-width="1"/>
+    <rect x="510" y="42" width="190" height="84" fill="#1a2027" stroke="#2a323a" stroke-width="1"/>
+    ${[0,1,2,3,4].map(i=>`<rect x="${100+i*35}" y="55" width="20" height="14" fill="#1a2b3a"/>`).join('')}
+    ${[0,1,2,3].map(i=>`<rect x="${330+i*38}" y="52" width="22" height="14" fill="#1a2b3a"/>`).join('')}
+    <rect x="530" y="56" width="150" height="16" fill="#c44a1a" opacity="0.55"/>
+    <text x="605" y="68" text-anchor="middle" fill="#f0e8d0" font-family="Courier Prime" font-size="10">COSTCO HQ · PICKERING PLACE</text>
+    <rect x="120" y="138" width="560" height="36" fill="#23201a"/>
+    ${[0,1,2,3,4,5].map(i=>`<rect x="${160+i*85}" y="146" width="56" height="20" fill="#2b2b2b" rx="2"/>`).join('')}
+    <text x="390" y="190" text-anchor="middle" fill="#3a2a10" font-family="Courier Prime" font-size="11">PICKERING PLACE · ISSAQUAH</text>
+  </svg>`;
+}
+
 function drawAlley() {
   return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
     <rect width="780" height="200" fill="#1a1208"/>
@@ -1160,6 +1273,7 @@ function render() {
     return;
   }
 
+  if (!locations[state.location]) state.location = 'driveway';
   const loc = locations[state.location];
   const pct = Math.min(100, Math.round((state.money / state.gasNeeded) * 100));
   const gasGotten = state.inventory.includes('1.5 gallons of regular unleaded');
@@ -1180,8 +1294,12 @@ function render() {
           <span class="stat-label">BOTTLES:</span>
           <span class="stat-val">${state.bottles}</span>
         </div>
+        <div class="stat">
+          <span class="stat-label">MOOD:</span>
+          <span class="stat-val">${modestMood()}</span>
+        </div>
         <div class="stat gas-meter">
-          <span class="stat-label">PROGRESS:</span>
+          <span class="stat-label">FLOAT METER:</span>
           ${Array.from({length:10},(_,i)=>`<div class="gas-pip ${i < Math.floor(pct/10) ? 'filled' : ''}"></div>`).join('')}
         </div>
       </div>
@@ -1204,12 +1322,9 @@ function render() {
     </div>
 
     <div style="margin-bottom:16px;">
-      <div class="section-label">TOWN MAP (CLICK TO TRAVEL)</div>
-      <div class="travel-map-wrap">
-        ${renderTravelMap()}
-      </div>
+      <div class="section-label">LOCATIONS</div>
       <div class="map-panel">
-        ${mapOrder.filter(l=>l!=='driveway_end').map(l=>`
+        ${mapOrder.filter(l => l !== 'driveway_end' && locations[l]).map(l=>`
           <div class="map-loc ${state.location===l?'current':''} ${state.visitedLocations.has(l)?'visited':''}" onclick="goTo('${l}')">
             ${locations[l].short}
           </div>
@@ -1225,7 +1340,7 @@ function render() {
       </div>
     </div>
 
-    <div class="section-label">LOG</div>
+    <div class="section-label">ROAD NOTES (the world at large)</div>
     <div class="log-box">
       ${state.log.slice(0,12).map(e=>`<div class="log-entry">${e}</div>`).join('') || '<div class="log-entry" style="color:#2a2a20;">nothing yet</div>'}
     </div>
@@ -1296,7 +1411,7 @@ function renderEnding() {
       </svg>
       <p>You pour in the gas. You get in the car. You turn the key.<br><br>Click.<br><br>The car has been trying to tell you something. You just weren't listening to the right part of it.</p>
       <p style="font-size:0.85rem; color:var(--grey); margin-top:12px;">"It's the solenoid," Ernest will tell you tomorrow. "Or the starter. Or the fuel pump. Or just the car being the car."</p>
-      <p style="font-size:0.85rem; color:var(--grey);">You walk back inside. You put the tape in the tape deck. The tape deck is a boombox on your kitchen table.<br><br>Float on.</p>
+      <p style="font-size:0.85rem; color:var(--grey);">You walk back inside. You put the tape in the tape deck. The tape deck is a boombox on your kitchen table.<br><br>Float on. (Yeah, even now.)</p>
       <div style="margin-top:30px; font-family:'VT323',monospace; color:var(--gold); font-size:1.2rem; letter-spacing:3px; margin-bottom:20px;">
         ${moneyStr(state.money)} left in your pocket. ${state.bottles} bottles uncashed.<br>
         It was a good day, mostly.
