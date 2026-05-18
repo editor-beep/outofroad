@@ -894,14 +894,7 @@ const locations = {
 };
 
 // ─── MAP ORDER ────────────────────────────────────────────────────────────────
-const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','salmon_hatchery','transit_center','bottle_depot','gas_station'];
-
-// Keep location registration additive to reduce merge conflicts when mapOrder changes elsewhere.
-['village_theatre', 'pickering_place'].forEach((locKey) => {
-  if (!mapOrder.includes(locKey) && locations[locKey]) {
-    mapOrder.splice(mapOrder.indexOf('alley'), 0, locKey);
-  }
-});
+const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','village_theatre','pickering_place','alley','salmon_hatchery','transit_center','bottle_depot','gas_station'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function moneyStr(cents) {
