@@ -355,6 +355,12 @@ const state = {
     helpedDog: false,
     trunkChecked: false,
     gloveboxChecked: false,
+    talkedToLena: false,
+    hatcheryVolunteer: false,
+    hatcheryCrateMoved: false,
+    talkedToDev: false,
+    buskerSetPlayed: false,
+    routeTipShared: false,
   },
   log: [],
   turn: 0,
@@ -703,6 +709,92 @@ const locations = {
     ]
   },
 
+  salmon_hatchery: {
+    name: "Issaquah Salmon Hatchery",
+    short: "Hatchery",
+    svg: drawDepot,
+    description: () => `Concrete raceways, creek water, and that metallic-sweet fish smell that sits in the back of your throat. You're by the Issaquah Salmon Hatchery off Sunset Way, where everybody from town ends up eventually - school kids, retirees, people killing ten minutes before traffic clears on Front Street.`,
+    actions: [
+      {
+        label: '💬 Talk to Lena (volunteer docent)',
+        key: 'talk_lena',
+        available: () => !state.flags.talkedToLena,
+        do: () => {
+          state.flags.talkedToLena = true;
+          narrative("Lena's in a faded hatchery vest, answering the same salmon questions for the fourth time this hour.\n\n"Car trouble?" she says before you finish your sentence. "Yeah, I can spot the face. I don't have cash, but I've got bottles from the staff fridge."\n\nShe hands you a paper bag with five empties and points at a hand truck loaded with educational exhibit crates. "If you can move those across to the classroom, I'll make it worth your time."");
+          gainBottles(5);
+          log("Lena at hatchery: 5 bottles + offered crate job.");
+        }
+      },
+      {
+        label: '📦 Move exhibit crates for Lena',
+        key: 'move_crates',
+        available: () => state.flags.talkedToLena && !state.flags.hatcheryCrateMoved,
+        do: () => {
+          state.flags.hatcheryCrateMoved = true;
+          state.flags.hatcheryVolunteer = true;
+          gainMoney(120, 'hatchery volunteer stipend');
+          narrative("You push two wobbly carts of laminated salmon-life-cycle boards and a tote of kid-sized life jackets into the classroom wing. A field trip bunch is ten minutes out, and Lena is visibly less stressed when you're done.\n\n"City gives us tiny stipends for setup help," she says, counting out a dollar and two dimes. "Take it before I spend it on coffee."");
+          log("Helped Lena move crates: +$1.20");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
+  transit_center: {
+    name: "Issaquah Transit Center",
+    short: "Transit Ctr",
+    svg: drawGasStation,
+    description: () => `The Issaquah Transit Center is all concrete bays, brake hiss, and commuters checking the time like they can bully it. A 554 to Seattle is posted on the board, and everybody crowds Bay 2 whenever headlights swing in from Newport Way.`,
+    actions: [
+      {
+        label: '💬 Talk to Dev (route supervisor)',
+        key: 'talk_dev',
+        available: () => !state.flags.talkedToDev,
+        do: () => {
+          state.flags.talkedToDev = true;
+          narrative("Dev has a radio clipped to his jacket and the thousand-yard stare of somebody who got asked where the 271 stops fifty times today.\n\n"No cash jobs," he says, "but if you can play something mellow for ten minutes, it keeps the platform from getting weird. Don't block the ADA strip and don't get in front of Bay 2."");
+          log("Dev allowed a short busker set.");
+        }
+      },
+      {
+        label: '🎶 Play a legal busker set',
+        key: 'busker_set',
+        available: () => state.flags.talkedToDev && !state.flags.buskerSetPlayed,
+        do: () => {
+          state.flags.buskerSetPlayed = true;
+          gainMoney(95, 'busker tips at transit center');
+          narrative("You keep it to one corner, out of the flow. Two office workers drop quarters, one barista drops a dollar, and a guy in hiking boots nods through the whole song without smiling.\n\nWhen a 554 pulls in, Dev points with two fingers: wrap it up. You do. He gives you a small thumbs-up on your way out.");
+          log("Transit busker set: +95¢");
+        }
+      },
+      {
+        label: '🧭 Give directions to a lost rider',
+        key: 'route_help',
+        available: () => state.flags.talkedToDev && !state.flags.routeTipShared,
+        do: () => {
+          state.flags.routeTipShared = true;
+          gainMoney(40, 'thank-you coffee money');
+          narrative("A nursing student asks if the Seattle express boards here or at the Highlands park-and-ride. You point to Bay 2 and read the sign with her to be sure.\n\nShe relaxes immediately, then presses two quarters and three dimes into your hand. "Coffee money for saving me from missing clinical," she says.");
+          log("Helped rider with Bay 2 info: +40¢");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
+
   driveway_end: {
     name: "Isaac's Driveway (Gas In Hand)",
     short: "Driveway",
@@ -728,7 +820,7 @@ const locations = {
 };
 
 // ─── MAP ORDER ────────────────────────────────────────────────────────────────
-const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','bottle_depot','gas_station'];
+const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','salmon_hatchery','transit_center','bottle_depot','gas_station'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function moneyStr(cents) {
