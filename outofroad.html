@@ -802,25 +802,8 @@ const locations = {
 };
 
 // ─── MAP ORDER ────────────────────────────────────────────────────────────────
-const mapOrder = [
-  'driveway',
-  'earnests',
-  'shellys',
-  'waynes',
-  'laundromat',
-  'village_theatre',
-  'pickering_place',
-  'alley',
-  'bottle_depot',
-  'gas_station'
-];
-
-// Backward-compat guard: if an upstream merge removes one of these keys, add it back.
-['village_theatre', 'pickering_place'].forEach((locKey) => {
-  if (!mapOrder.includes(locKey) && locations[locKey]) {
-    mapOrder.push(locKey);
-  }
-});
+const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','bottle_depot','gas_station'];
+const addedMapLocations = ['village_theatre', 'pickering_place'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function moneyStr(cents) {
@@ -1230,7 +1213,8 @@ function render() {
     <div style="margin-bottom:16px;">
       <div class="section-label">LOCATIONS</div>
       <div class="map-panel">
-        ${mapOrder.filter(l => l !== 'driveway_end' && locations[l]).map(l=>`
+        ${[...mapOrder.slice(0,5), ...addedMapLocations, ...mapOrder.slice(5)]
+          .filter(l => l !== 'driveway_end' && locations[l]).map(l=>`
           <div class="map-loc ${state.location===l?'current':''} ${state.visitedLocations.has(l)?'visited':''}" onclick="goTo('${l}')">
             ${locations[l].short}
           </div>
