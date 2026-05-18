@@ -346,12 +346,16 @@ const state = {
     talkedToShelly: false,
     talkedToWayne: false,
     talkedToMary: false,
+    talkedToMara: false,
+    talkedToGlen: false,
     dumpsterDived: false,
     couchSearched_shelter: false,
     couchSearched_wayne: false,
     couchSearched_laundro: false,
     dishesWashed: false,
     flyersHung: false,
+    usheredAtVillage: false,
+    sortedFlyersAtCostco: false,
     helpedDog: false,
     trunkChecked: false,
     gloveboxChecked: false,
@@ -639,6 +643,80 @@ const locations = {
     ]
   },
 
+  village_theatre: {
+    name: "Village Theatre (First Stage Block)",
+    short: "Village Theatre",
+    svg: drawTheatre,
+    description: () => `Front Street's lit up by the old First Stage building and the newer Gaudette Theatre across the way. In 1997, everybody still calls it \"the Village\" like it's one room, even though the big Gaudette house opened in '94 and changed the whole block.`,
+    actions: [
+      {
+        label: '🎭 Talk to Mara at the box office',
+        key: 'talk_mara',
+        available: () => !state.flags.talkedToMara,
+        do: () => {
+          state.flags.talkedToMara = true;
+          narrative("Mara counts ticket stubs with one hand and answers your disaster with the other.\n\n\"Your Civic died?\"\n\n\"Yeah.\"\n\n\"Usher call-out tonight. Forty-five minutes. Cash envelope after curtain.\"\n\nYou nod like this is a normal career move.");
+          log("Mara offered an usher shift.");
+        }
+      },
+      {
+        label: '🎟️ Usher late seating for Act One',
+        key: 'usher_shift',
+        available: () => state.flags.talkedToMara && !state.flags.usheredAtVillage,
+        do: () => {
+          state.flags.usheredAtVillage = true;
+          gainMoney(110, 'usher shift at Village Theatre');
+          narrative("You hand out programs, whisper \"watch your step\" fourteen times, and seat three families after lights down without dropping a flashlight. Mara slips you a folded envelope on break.\n\n\"Hundred and ten,\" she says. \"And take these cans from concessions before they go flat.\"");
+          gainBottles(5);
+          log("Ushered at Village Theatre: +$1.10 and 5 bottles.");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
+  pickering_place: {
+    name: "Pickering Place Offices",
+    short: "Pickering Place",
+    svg: drawOfficePark,
+    description: () => `At Pickering Place, the Costco office buildings still smell new. They moved their HQ here from Kirkland last year (1996), and now half the parking lot is membership cards and coffee thermoses.`,
+    actions: [
+      {
+        label: '💬 Ask Glen by the loading door',
+        key: 'talk_glen',
+        available: () => !state.flags.talkedToGlen,
+        do: () => {
+          state.flags.talkedToGlen = true;
+          narrative("Glen is on smoke break in a blue vest with his badge flipped backward.\n\n\"No hiring today,\" he says before you finish asking. \"But marketing dumped a box of old flyer inserts in receiving. Sort the recycling and I'll cover your bus fare equivalent.\"");
+          log("Glen offered a quick sorting job.");
+        }
+      },
+      {
+        label: '📦 Sort flyer inserts for recycling',
+        key: 'sort_flyers',
+        available: () => state.flags.talkedToGlen && !state.flags.sortedFlyersAtCostco,
+        do: () => {
+          state.flags.sortedFlyersAtCostco = true;
+          gainMoney(95, 'sorting paper at Pickering Place');
+          gainBottles(3);
+          narrative("You separate glossy inserts, cardboard cores, and a depressing amount of shrink wrap. Glen hands you ninety-five cents in mixed coin and points at a sack of empties from the breakroom.\n\n\"Take those too,\" he says. \"State says five cents each anyway.\"");
+          log("Sorted office recycling: +95¢ and 3 bottles.");
+        }
+      },
+      {
+        label: '⬅️ Leave',
+        key: 'leave',
+        available: () => true,
+        do: () => showMap()
+      }
+    ]
+  },
+
   alley: {
     name: "The Alley Behind 4th",
     short: "Alley",
@@ -728,7 +806,7 @@ const locations = {
 };
 
 // ─── MAP ORDER ────────────────────────────────────────────────────────────────
-const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','alley','bottle_depot','gas_station'];
+const mapOrder = ['driveway','earnests','shellys','waynes','laundromat','village_theatre','pickering_place','alley','bottle_depot','gas_station'];
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 function moneyStr(cents) {
@@ -988,6 +1066,42 @@ function drawLaundromat() {
   </svg>`;
 }
 
+function drawTheatre() {
+  return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="780" height="200" fill="#1a1208"/>
+    <rect width="780" height="125" fill="#111019"/>
+    <rect y="125" width="780" height="75" fill="#1a1208"/>
+    <rect x="70" y="42" width="250" height="95" fill="#18140f" stroke="#2b2217" stroke-width="1"/>
+    <rect x="80" y="52" width="95" height="70" fill="#0e0d0a"/>
+    <text x="127" y="87" text-anchor="middle" fill="#d4a832" font-family="VT323" font-size="11">FIRST STAGE</text>
+    <rect x="360" y="30" width="320" height="118" fill="#1a1a1a" stroke="#2b2b2b" stroke-width="1"/>
+    <rect x="380" y="48" width="280" height="20" fill="#c44a1a" opacity="0.55"/>
+    <text x="520" y="62" text-anchor="middle" fill="#f0e8d0" font-family="Courier Prime" font-size="11">GAUDETTE THEATRE</text>
+    <rect x="430" y="72" width="180" height="56" fill="#0f1216" stroke="#2a3340" stroke-width="1"/>
+    <circle cx="220" cy="152" r="9" fill="#241b13"/>
+    <rect x="213" y="160" width="14" height="18" fill="#2b2018"/>
+    <text x="390" y="190" text-anchor="middle" fill="#3a2a10" font-family="Courier Prime" font-size="11">FRONT STREET · VILLAGE THEATRE BLOCK</text>
+  </svg>`;
+}
+
+function drawOfficePark() {
+  return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="780" height="200" fill="#1a1208"/>
+    <rect width="780" height="120" fill="#10131a"/>
+    <rect y="120" width="780" height="80" fill="#1a1208"/>
+    <rect x="80" y="38" width="210" height="88" fill="#1a1e24" stroke="#2a323a" stroke-width="1"/>
+    <rect x="310" y="34" width="180" height="92" fill="#1d232a" stroke="#2a323a" stroke-width="1"/>
+    <rect x="510" y="42" width="190" height="84" fill="#1a2027" stroke="#2a323a" stroke-width="1"/>
+    ${[0,1,2,3,4].map(i=>`<rect x="${100+i*35}" y="55" width="20" height="14" fill="#1a2b3a"/>`).join('')}
+    ${[0,1,2,3].map(i=>`<rect x="${330+i*38}" y="52" width="22" height="14" fill="#1a2b3a"/>`).join('')}
+    <rect x="530" y="56" width="150" height="16" fill="#c44a1a" opacity="0.55"/>
+    <text x="605" y="68" text-anchor="middle" fill="#f0e8d0" font-family="Courier Prime" font-size="10">COSTCO HQ · PICKERING PLACE</text>
+    <rect x="120" y="138" width="560" height="36" fill="#23201a"/>
+    ${[0,1,2,3,4,5].map(i=>`<rect x="${160+i*85}" y="146" width="56" height="20" fill="#2b2b2b" rx="2"/>`).join('')}
+    <text x="390" y="190" text-anchor="middle" fill="#3a2a10" font-family="Courier Prime" font-size="11">PICKERING PLACE · ISSAQUAH</text>
+  </svg>`;
+}
+
 function drawAlley() {
   return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
     <rect width="780" height="200" fill="#1a1208"/>
@@ -1055,6 +1169,7 @@ function render() {
     return;
   }
 
+  if (!locations[state.location]) state.location = 'driveway';
   const loc = locations[state.location];
   const pct = Math.min(100, Math.round((state.money / state.gasNeeded) * 100));
   const gasGotten = state.inventory.includes('1.5 gallons of regular unleaded');
@@ -1101,7 +1216,7 @@ function render() {
     <div style="margin-bottom:16px;">
       <div class="section-label">LOCATIONS</div>
       <div class="map-panel">
-        ${mapOrder.filter(l=>l!=='driveway_end').map(l=>`
+        ${mapOrder.filter(l => l !== 'driveway_end' && locations[l]).map(l=>`
           <div class="map-loc ${state.location===l?'current':''} ${state.visitedLocations.has(l)?'visited':''}" onclick="goTo('${l}')">
             ${locations[l].short}
           </div>
