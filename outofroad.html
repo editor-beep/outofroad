@@ -799,7 +799,7 @@ const locations = {
         available: () => !state.flags.talkedToLena,
         do: () => {
           state.flags.talkedToLena = true;
-          narrative("Lena's in a faded hatchery vest, answering the same salmon questions for the fourth time this hour.\n\n"Car trouble?" she says before you finish your sentence. "Yeah, I can spot the face. I don't have cash, but I've got bottles from the staff fridge."\n\nShe hands you a paper bag with five empties and points at a hand truck loaded with educational exhibit crates. "If you can move those across to the classroom, I'll make it worth your time."");
+          narrative("Lena's in a faded hatchery vest, answering the same salmon questions for the fourth time this hour.\n\n\"Car trouble?\" she says before you finish your sentence. \"Yeah, I can spot the face. I don't have cash, but I've got bottles from the staff fridge.\"\n\nShe hands you a paper bag with five empties and points at a hand truck loaded with educational exhibit crates. \"If you can move those across to the classroom, I'll make it worth your time.\"");
           gainBottles(5);
           log("Lena at hatchery: 5 bottles + offered crate job.");
         }
@@ -812,7 +812,7 @@ const locations = {
           state.flags.hatcheryCrateMoved = true;
           state.flags.hatcheryVolunteer = true;
           gainMoney(120, 'hatchery volunteer stipend');
-          narrative("You push two wobbly carts of laminated salmon-life-cycle boards and a tote of kid-sized life jackets into the classroom wing. A field trip bunch is ten minutes out, and Lena is visibly less stressed when you're done.\n\n"City gives us tiny stipends for setup help," she says, counting out a dollar and two dimes. "Take it before I spend it on coffee."");
+          narrative("You push two wobbly carts of laminated salmon-life-cycle boards and a tote of kid-sized life jackets into the classroom wing. A field trip bunch is ten minutes out, and Lena is visibly less stressed when you're done.\n\n\"City gives us tiny stipends for setup help,\" she says, counting out a dollar and two dimes. \"Take it before I spend it on coffee.\"");
           log("Helped Lena move crates: +$1.20");
         }
       },
@@ -837,7 +837,7 @@ const locations = {
         available: () => !state.flags.talkedToDev,
         do: () => {
           state.flags.talkedToDev = true;
-          narrative("Dev has a radio clipped to his jacket and the thousand-yard stare of somebody who got asked where the 271 stops fifty times today.\n\n"No cash jobs," he says, "but if you can play something mellow for ten minutes, it keeps the platform from getting weird. Don't block the ADA strip and don't get in front of Bay 2."");
+          narrative("Dev has a radio clipped to his jacket and the thousand-yard stare of somebody who got asked where the 271 stops fifty times today.\n\n\"No cash jobs,\" he says, \"but if you can play something mellow for ten minutes, it keeps the platform from getting weird. Don't block the ADA strip and don't get in front of Bay 2.\"");
           log("Dev allowed a short busker set.");
         }
       },
@@ -859,7 +859,7 @@ const locations = {
         do: () => {
           state.flags.routeTipShared = true;
           gainMoney(40, 'thank-you coffee money');
-          narrative("A nursing student asks if the Seattle express boards here or at the Highlands park-and-ride. You point to Bay 2 and read the sign with her to be sure.\n\nShe relaxes immediately, then presses two quarters and three dimes into your hand. "Coffee money for saving me from missing clinical," she says.");
+          narrative("A nursing student asks if the Seattle express boards here or at the Highlands park-and-ride. You point to Bay 2 and read the sign with her to be sure.\n\nShe relaxes immediately, then presses two quarters and three dimes into your hand. \"Coffee money for saving me from missing clinical,\" she says.");
           log("Helped rider with Bay 2 info: +40¢");
         }
       },
