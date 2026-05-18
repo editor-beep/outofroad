@@ -1392,11 +1392,82 @@ window.doAction = function(i) {
   }
 };
 
+
+function getEndingTone() {
+  const bottleActions = [
+    'talkedToErnest','talkedToShelly','talkedToWayne','talkedToMary','dumpsterDived',
+    'talkedToMara','talkedToGlen','talkedToLena'
+  ];
+  const oddJobActions = [
+    'dishesWashed','flyersHung','usheredAtVillage','sortedFlyersAtCostco','hatcheryCrateMoved','buskerSetPlayed'
+  ];
+  const socialActions = [
+    'talkedToErnest','talkedToShelly','talkedToWayne','talkedToMary','talkedToLena','talkedToDev','routeTipShared','helpedDog'
+  ];
+
+  const bottleScore = bottleActions.filter((k) => state.flags[k]).length + Math.floor((state.bottles + (state.flags.dumpsterDived ? 7 : 0)) / 4);
+  const oddJobScore = oddJobActions.filter((k) => state.flags[k]).length;
+  const socialScore = socialActions.filter((k) => state.flags[k]).length;
+
+  const ranked = [
+    { key: 'bottles', score: bottleScore },
+    { key: 'jobs', score: oddJobScore },
+    { key: 'social', score: socialScore },
+  ].sort((a, b) => b.score - a.score);
+
+  return ranked[0].key;
+}
+
+function getMoneyTier(cents) {
+  if (cents < 50) return 'threadbare';
+  if (cents < 200) return 'scraping';
+  if (cents < 500) return 'steady';
+  return 'cushion';
+}
+
+function getEndingCopy() {
+  const tone = getEndingTone();
+  const tier = getMoneyTier(state.money);
+
+  const titles = {
+    bottles: 'Got Yourself By Bottles Back',
+    jobs: 'Gotta Go To Work Gotta Go To Work Gotta Have a Job',
+    social: 'You Still Got Your Words and You Got Your Friends',
+  };
+
+  const paragraphs = {
+    bottles: {
+      threadbare: "You ran town-to-town on glass clinks and curbside luck, and it still mostly spent itself on the way home. Your pockets are light, your hands smell like aluminum and rainwater, and somehow you still feel like you won a small argument with gravity.",
+      scraping: "You made it on deposit ghosts and porch-bag miracles, turning everybody's empties into one more block of tomorrow. It's not a fortune, but it's enough to buy bread, maybe coffee, maybe one less panic before sundown.",
+      steady: "You turned bottle routes into a minor economy - shed bins, fence lines, staff fridges, the whole unofficial map. Coins stack into weight. Weight stacks into choices. For one night, at least, the math is on your side.",
+      cushion: "You became a full-time recycler of the world's leftovers and accidentally built a bankroll out of clatter and patience. The city threw away nickels all day; you picked up every one and called it a future.",
+    },
+    jobs: {
+      threadbare: "You punched every little clock you could find and still crawled over the line with lint in your wallet. That's the joke, maybe: even when you do it right, the numbers stay mean. Still - you showed up. That counts for something.",
+      scraping: "Dishwater hands, staple-gun wrists, theatre aisle knees - paid in quarters, dimes, and the kind of nod that means 'good enough.' You worked for every cent, and every cent looks back at you like a witness.",
+      steady: "You took the shifts nobody brags about and stitched them into real money: the practical kind, the rent-adjacent kind. It's not glamorous, but neither is standing still. Tonight you bought motion the honest way.",
+      cushion: "You went full patchwork labor legend - apron to loading dock to flashlight aisle - and came out ahead by a surprising margin. The town paid you in loose change and short trust; you returned both with interest.",
+    },
+    social: {
+      threadbare: "You got through on conversations and open doors - people who said your name, people who handed you what they could. The cash is thin, but the net held. Some nights that's the whole miracle.",
+      scraping: "You talked, listened, carried, pointed, showed up. Friends and near-friends kept passing the day forward in small amounts until it looked like luck from a distance. Not rich, not doomed - just held together.",
+      steady: "You built your day out of favors, trust, and the soft economy of being known in a small town. By nightfall, the numbers actually cooperate. Community doesn't fix the car, but it keeps you from disappearing.",
+      cushion: "Every stop turned into a handoff - names remembered, jobs offered, bottles pressed into your arms, coffee money folded into your palm. You left with more than cash. You left with proof you belong somewhere.",
+    },
+  };
+
+  return {
+    title: titles[tone],
+    paragraph: paragraphs[tone][tier],
+  };
+}
+
 function renderEnding() {
+  const ending = getEndingCopy();
   return `
     <div class="end-screen">
       <div style="font-family:'Special Elite',cursive; font-size:1rem; color:var(--rust); letter-spacing:3px; margin-bottom:20px;">EPILOGUE</div>
-      <h2>click.</h2>
+      <h2>${ending.title}</h2>
       <svg width="300" height="120" viewBox="0 0 300 120" style="margin:0 auto 24px;display:block;">
         <rect width="300" height="120" fill="#1a1208"/>
         <rect x="30" y="35" width="240" height="55" fill="#2a3a4a" rx="4"/>
@@ -1411,6 +1482,7 @@ function renderEnding() {
       </svg>
       <p>You pour in the gas. You get in the car. You turn the key.<br><br>Click.<br><br>The car has been trying to tell you something. You just weren't listening to the right part of it.</p>
       <p style="font-size:0.85rem; color:var(--grey); margin-top:12px;">"It's the solenoid," Ernest will tell you tomorrow. "Or the starter. Or the fuel pump. Or just the car being the car."</p>
+      <p style="font-size:0.9rem; color:var(--pale); margin-top:14px;">${ending.paragraph}</p>
       <p style="font-size:0.85rem; color:var(--grey);">You walk back inside. You put the tape in the tape deck. The tape deck is a boombox on your kitchen table.<br><br>Float on. (Yeah, even now.)</p>
       <div style="margin-top:30px; font-family:'VT323',monospace; color:var(--gold); font-size:1.2rem; letter-spacing:3px; margin-bottom:20px;">
         ${moneyStr(state.money)} left in your pocket. ${state.bottles} bottles uncashed.<br>
