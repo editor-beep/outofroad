@@ -326,7 +326,7 @@ transition: background 0.3s;
 
   <header>
     <div class="title">FLOAT ON (EVENTUALLY)</div>
-    <div class="subtitle">a modest mouse adventure · issaquah, wa · 1997</div>
+    <div class="subtitle">a modest mouse adventure · issaquah, wa · 1997 · formed here in 1993</div>
   </header>
 
   <div id="gameContainer"></div>
@@ -829,6 +829,15 @@ function moneyStr(cents) {
   return c > 0 ? `$${d}.${String(c).padStart(2,'0')}` : `$${d}.00`;
 }
 
+
+function modestMood() {
+  const pct = state.money / state.gasNeeded;
+  if (pct >= 1) return 'Float On';
+  if (pct >= 0.66) return 'Ocean Breathes Salty';
+  if (pct >= 0.33) return 'The World at Large';
+  return 'Dramamine';
+}
+
 function gainMoney(cents, source) {
   state.money += cents;
   log(`+${moneyStr(cents)} (${source})`);
@@ -1167,8 +1176,12 @@ function render() {
           <span class="stat-label">BOTTLES:</span>
           <span class="stat-val">${state.bottles}</span>
         </div>
+        <div class="stat">
+          <span class="stat-label">MOOD:</span>
+          <span class="stat-val">${modestMood()}</span>
+        </div>
         <div class="stat gas-meter">
-          <span class="stat-label">PROGRESS:</span>
+          <span class="stat-label">FLOAT METER:</span>
           ${Array.from({length:10},(_,i)=>`<div class="gas-pip ${i < Math.floor(pct/10) ? 'filled' : ''}"></div>`).join('')}
         </div>
       </div>
@@ -1209,7 +1222,7 @@ function render() {
       </div>
     </div>
 
-    <div class="section-label">LOG</div>
+    <div class="section-label">ROAD NOTES (the world at large)</div>
     <div class="log-box">
       ${state.log.slice(0,12).map(e=>`<div class="log-entry">${e}</div>`).join('') || '<div class="log-entry" style="color:#2a2a20;">nothing yet</div>'}
     </div>
@@ -1280,7 +1293,7 @@ function renderEnding() {
       </svg>
       <p>You pour in the gas. You get in the car. You turn the key.<br><br>Click.<br><br>The car has been trying to tell you something. You just weren't listening to the right part of it.</p>
       <p style="font-size:0.85rem; color:var(--grey); margin-top:12px;">"It's the solenoid," Ernest will tell you tomorrow. "Or the starter. Or the fuel pump. Or just the car being the car."</p>
-      <p style="font-size:0.85rem; color:var(--grey);">You walk back inside. You put the tape in the tape deck. The tape deck is a boombox on your kitchen table.<br><br>Float on.</p>
+      <p style="font-size:0.85rem; color:var(--grey);">You walk back inside. You put the tape in the tape deck. The tape deck is a boombox on your kitchen table.<br><br>Float on. (Yeah, even now.)</p>
       <div style="margin-top:30px; font-family:'VT323',monospace; color:var(--gold); font-size:1.2rem; letter-spacing:3px; margin-bottom:20px;">
         ${moneyStr(state.money)} left in your pocket. ${state.bottles} bottles uncashed.<br>
         It was a good day, mostly.
