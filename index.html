@@ -230,6 +230,72 @@ flex-wrap: wrap;
 margin-bottom: 16px;
 }
 
+.travel-map-wrap {
+  background: #0f0b05;
+  border: 1px solid #2a1e08;
+  border-radius: 2px;
+  padding: 8px;
+  margin-bottom: 16px;
+}
+
+.travel-map {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.travel-road {
+  stroke: #3a2a10;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.travel-road.locked {
+  stroke: #22180a;
+  stroke-dasharray: 4 4;
+}
+
+.travel-pin {
+  cursor: pointer;
+}
+
+.travel-pin-dot {
+  fill: #4a3820;
+  stroke: #8a7a5a;
+  stroke-width: 2;
+  transition: all 0.15s;
+}
+
+.travel-pin-label {
+  fill: var(--grey);
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  letter-spacing: 0.6px;
+  pointer-events: none;
+}
+
+.travel-pin:hover .travel-pin-dot {
+  fill: #6a4a24;
+  stroke: var(--gold);
+}
+
+.travel-pin:hover .travel-pin-label {
+  fill: var(--pale);
+}
+
+.travel-pin.current .travel-pin-dot {
+  fill: #c44a1a;
+  stroke: var(--gold);
+}
+
+.travel-pin.current .travel-pin-label {
+  fill: var(--gold);
+}
+
+.travel-pin.visited .travel-pin-dot {
+  fill: #5a4828;
+}
+
 .map-loc {
 font-family: 'VT323', monospace;
 font-size: 0.95rem;
@@ -778,6 +844,45 @@ function showMap() {
   narrative("Where do you need to go?\n\n(Use the map below.)");
 }
 
+function renderTravelMap() {
+  const points = {
+    driveway: { x: 75, y: 175, label: "Driveway" },
+    earnests: { x: 160, y: 125, label: "Ernest's" },
+    shellys: { x: 250, y: 85, label: "Shelly's" },
+    waynes: { x: 375, y: 62, label: "Wayne's" },
+    laundromat: { x: 505, y: 88, label: "Laundromat" },
+    alley: { x: 610, y: 130, label: "Alley" },
+    bottle_depot: { x: 470, y: 172, label: "Bottle Depot" },
+    gas_station: { x: 300, y: 175, label: "Gas Station" }
+  };
+  const routes = [
+    ['driveway', 'earnests'], ['earnests', 'shellys'], ['shellys', 'waynes'],
+    ['waynes', 'laundromat'], ['laundromat', 'alley'], ['alley', 'bottle_depot'],
+    ['bottle_depot', 'gas_station'], ['gas_station', 'driveway'], ['shellys', 'gas_station']
+  ];
+
+  return `
+  <svg class="travel-map" viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Town map with clickable travel locations">
+    <rect width="700" height="230" fill="#171008"/>
+    <path d="M0,35 C140,10 290,25 420,15 C520,8 600,20 700,28" stroke="#241809" stroke-width="22" fill="none" opacity="0.35"/>
+    ${routes.map(([a,b]) => {
+      const pa = points[a], pb = points[b];
+      const known = state.visitedLocations.has(a) || state.visitedLocations.has(b);
+      return `<line class="travel-road ${known ? '' : 'locked'}" x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}" />`;
+    }).join('')}
+    ${mapOrder.filter(l => l !== 'driveway_end').map((locKey) => {
+      const p = points[locKey];
+      const isCurrent = state.location === locKey;
+      const isVisited = state.visitedLocations.has(locKey);
+      return `
+      <g class="travel-pin ${isCurrent ? 'current' : ''} ${isVisited ? 'visited' : ''}" onclick="goTo('${locKey}')">
+        <circle class="travel-pin-dot" cx="${p.x}" cy="${p.y}" r="12"/>
+        <text class="travel-pin-label" x="${p.x + 16}" y="${p.y + 5}">${p.label}</text>
+      </g>`;
+    }).join('')}
+  </svg>`;
+}
+
 // ─── SVG SCENES ───────────────────────────────────────────────────────────────
 function drawDriveway() {
   return `<svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg">
@@ -1099,7 +1204,10 @@ function render() {
     </div>
 
     <div style="margin-bottom:16px;">
-      <div class="section-label">LOCATIONS</div>
+      <div class="section-label">TOWN MAP (CLICK TO TRAVEL)</div>
+      <div class="travel-map-wrap">
+        ${renderTravelMap()}
+      </div>
       <div class="map-panel">
         ${mapOrder.filter(l=>l!=='driveway_end').map(l=>`
           <div class="map-loc ${state.location===l?'current':''} ${state.visitedLocations.has(l)?'visited':''}" onclick="goTo('${l}')">
