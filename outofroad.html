@@ -1169,6 +1169,7 @@ function render() {
     return;
   }
 
+  if (!locations[state.location]) state.location = 'driveway';
   const loc = locations[state.location];
   const pct = Math.min(100, Math.round((state.money / state.gasNeeded) * 100));
   const gasGotten = state.inventory.includes('1.5 gallons of regular unleaded');
@@ -1215,7 +1216,7 @@ function render() {
     <div style="margin-bottom:16px;">
       <div class="section-label">LOCATIONS</div>
       <div class="map-panel">
-        ${mapOrder.filter(l=>l!=='driveway_end').map(l=>`
+        ${mapOrder.filter(l => l !== 'driveway_end' && locations[l]).map(l=>`
           <div class="map-loc ${state.location===l?'current':''} ${state.visitedLocations.has(l)?'visited':''}" onclick="goTo('${l}')">
             ${locations[l].short}
           </div>
